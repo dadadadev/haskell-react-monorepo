@@ -7,3 +7,5 @@ sudo apt-get install -y --no-install-recommends dpkg-dev gcc libc6-dev libffi-de
 sudo rm -rf .stack-work
 sudo rm -f stack.yaml stack.yaml.lock
 stack init --force && stack build
+
+stack install ghcid
