@@ -2,7 +2,8 @@
   "name": "haskell react web app",
   "image": "mcr.microsoft.com/devcontainers/base:bullseye",
   "features": {
-    "ghcr.io/devcontainers-contrib/features/haskell:2": {}
+    "ghcr.io/devcontainers-contrib/features/haskell:2": {},
+    "ghcr.io/devcontainers/features/node:1": {}
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
