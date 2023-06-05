@@ -7,7 +7,8 @@ where
 
 import Network.HTTP.Types (status200)
 import Network.Wai (Application, responseLBS)
-import Network.Wai.Handler.Warp (run)
+import Network.Wai.Handler.Warp (defaultSettings, runSettings, setLogger, setPort)
+import Network.Wai.Logger (withStdoutLogger)
 
 app :: Application
 app _ respond = do
@@ -21,4 +22,7 @@ app _ respond = do
 runServer :: IO ()
 runServer = do
   putStrLn "Server1 is running..."
-  run 8080 app
+  withStdoutLogger $
+    \apilogger -> do
+      let settings = setPort 8080 $ setLogger apilogger defaultSettings
+      runSettings settings app
