@@ -1,16 +1,14 @@
 import './App.css';
 import { useEffect, useState } from 'react'
 
-const api = () => {
-  return fetch("http://localhost:3000/hello");
-}
+const baseApiUrl = "http://localhost:3000/api"
 
 function App() {
   const [text, setText] = useState('');
 
   useEffect(() => {
     (async () => {
-      const result = await api();
+      const result = await fetch(`${baseApiUrl}`);
       const text = await result.text();
       setText(text);
     })();
@@ -19,7 +17,22 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        {text}
+        <div>{text}</div>
+
+        <button onClick={async () => {
+          const res = await fetch(`${baseApiUrl}/hello`)
+          const text = await res.text()
+          setText(text)
+        }}>hello</button>
+
+        <button onClick={async () => {
+          const res = await fetch(`${baseApiUrl}/foo`)
+          if (!res.ok) {
+            setText('404')
+          }
+        }}>invalid request</button>
+
+        <button onClick={() => { window.location.reload() }}>reload</button>
       </header>
     </div>
   );
