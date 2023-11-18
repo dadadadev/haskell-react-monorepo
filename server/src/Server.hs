@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Server1
-  ( runServer,
+module Server
+  ( run,
   )
 where
 
@@ -40,9 +40,9 @@ halloApp _ respond = do
       [("Content-Type", "text/plain")]
       "Hello"
 
-runServer :: IO ()
-runServer = do
-  putStrLn "Server1 is running..."
+run :: IO ()
+run = do
+  putStrLn "Server is running..."
   withStdoutLogger $
     \apilogger -> do
       let settings = setPort 8080 $ setLogger apilogger defaultSettings
