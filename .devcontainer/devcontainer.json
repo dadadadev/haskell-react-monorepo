@@ -9,6 +9,7 @@
   // "forwardPorts": [],
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "/bin/sh .devcontainer/postCreateCommand.sh",
+  "postStartCommand": "ghcid --command='stack ghci server' -T=':main' & npm start --prefix client",
   // Configure tool-specific properties.
   // "customizations": {},
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
