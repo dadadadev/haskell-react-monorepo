@@ -16,24 +16,22 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <div>{text}</div>
+      <div>{text}</div>
 
-        <button onClick={async () => {
-          const res = await fetch(`${baseApiUrl}/hello`)
-          const text = await res.text()
-          setText(text)
-        }}>hello</button>
+      <button onClick={async () => {
+        const res = await fetch(`${baseApiUrl}/hello`)
+        const text = await res.text()
+        setText(text)
+      }}>hello</button>
 
-        <button onClick={async () => {
-          const res = await fetch(`${baseApiUrl}/foo`)
-          if (!res.ok) {
-            setText('404')
-          }
-        }}>invalid request</button>
+      <button onClick={async () => {
+        const res = await fetch(`${baseApiUrl}/foo`)
+        if (!res.ok) {
+          setText('404')
+        }
+      }}>invalid request</button>
 
-        <button onClick={() => { window.location.reload() }}>reload</button>
-      </header>
+      <button onClick={() => { window.location.reload() }}>reload</button>
     </div>
   );
 }
