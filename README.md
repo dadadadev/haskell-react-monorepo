@@ -2,4 +2,5 @@
 
 ```sh
 ghcid --command="stack ghci server" -T=":main"
+npm start --prefix client
 ```
