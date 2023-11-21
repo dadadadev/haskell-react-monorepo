@@ -9,3 +9,6 @@ sudo rm -f stack.yaml stack.yaml.lock
 stack init --force && stack build
 
 stack install ghcid
+
+sudo apt-get install -y sqlite3
+sqlite3 test.db "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, str text); INSERT INTO test (str) VALUES ('test string');"

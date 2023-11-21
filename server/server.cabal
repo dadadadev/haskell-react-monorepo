@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.35.2.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Db
       Lib
       Server
   other-modules:
@@ -35,6 +36,7 @@ library
   build-depends:
       base >=4.7 && <5
     , http-types
+    , sqlite-simple
     , wai
     , wai-logger
     , warp
@@ -51,6 +53,7 @@ executable server-exe
       base >=4.7 && <5
     , http-types
     , server
+    , sqlite-simple
     , wai
     , wai-logger
     , warp
@@ -68,6 +71,7 @@ test-suite server-test
       base >=4.7 && <5
     , http-types
     , server
+    , sqlite-simple
     , wai
     , wai-logger
     , warp
