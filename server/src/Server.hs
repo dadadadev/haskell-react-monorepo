@@ -5,6 +5,7 @@ module Server
   )
 where
 
+import Db (insertMessage)
 import Network.HTTP.Types (status200, status404)
 import Network.Wai (Application, Request (pathInfo), responseLBS)
 import Network.Wai.Handler.Warp (defaultSettings, runSettings, setLogger, setPort)
@@ -14,6 +15,7 @@ router :: Application
 router req = case pathInfo req of
   ["api"] -> indexApp req
   ["api", "hello"] -> halloApp req
+  ["api", "create-message"] -> createMessage req
   _ -> notFoundApp req
 
 indexApp :: Application
@@ -39,6 +41,15 @@ halloApp _ respond = do
       status200
       [("Content-Type", "text/plain")]
       "Hello"
+
+createMessage :: Application
+createMessage _ respond = do
+  insertMessage "test by request"
+  respond $
+    responseLBS
+      status200
+      [("Content-Type", "text/plain")]
+      "Succeeded"
 
 run :: IO ()
 run = do

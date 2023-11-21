@@ -25,6 +25,12 @@ function App() {
       }}>hello</button>
 
       <button onClick={async () => {
+        const res = await fetch(`${baseApiUrl}/create-message`)
+        const text = await res.text()
+        setText(text)
+      }}>create-message</button>
+
+      <button onClick={async () => {
         const res = await fetch(`${baseApiUrl}/foo`)
         if (!res.ok) {
           setText('404')
