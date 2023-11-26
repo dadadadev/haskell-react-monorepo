@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Db
-  ( insertMessage,
+  ( insertPostOnlyMessage,
   )
 where
 
@@ -16,15 +16,19 @@ import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow (field, fromRow)
 import Database.SQLite.Simple.Types (Only (Only))
 
-data TestField = TestField Int String deriving (Show)
+data PostRecord = PostRecord
+  { id :: Int,
+    message :: String
+  }
+  deriving (Show)
 
-instance FromRow TestField where
-  fromRow = TestField <$> field <*> field
+instance FromRow PostRecord where
+  fromRow = PostRecord <$> field <*> field
 
-insertMessage :: String -> IO ()
-insertMessage message = do
-  conn <- open "test.db"
-  execute conn "INSERT INTO test (str) VALUES (?)" (Only (message :: String))
-  r <- query_ conn "SELECT * from test" :: IO [TestField]
+insertPostOnlyMessage :: String -> IO ()
+insertPostOnlyMessage newMessage = do
+  conn <- open "db.sqlite3"
+  execute conn "INSERT INTO post (str) VALUES (?)" (Only (newMessage :: String))
+  r <- query_ conn "SELECT * from post" :: IO [PostRecord]
   mapM_ print r
   close conn

@@ -11,4 +11,4 @@ stack init --force --resolver=lts-21.21 && stack build
 stack install ghcid
 
 cd server && sudo apt-get install -y sqlite3
-sqlite3 test.db "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, str text);"
+sqlite3 db.sqlite3 "CREATE TABLE IF NOT EXISTS post (id INTEGER PRIMARY KEY, str text);"

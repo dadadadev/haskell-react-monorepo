@@ -8,7 +8,7 @@ where
 
 import Data.Aeson (FromJSON, decode)
 import qualified Data.ByteString.Lazy as BL
-import Db (insertMessage)
+import Db (insertPostOnlyMessage)
 import GHC.Generics (Generic)
 import Network.HTTP.Types (status200, status400, status404)
 import Network.Wai (Application, Request (pathInfo), getRequestBodyChunk, responseLBS)
@@ -49,7 +49,7 @@ postApp req respond = do
   body <- getRequestBodyChunk req
   case decode (BL.fromChunks [body]) :: Maybe Post of
     Just post -> do
-      insertMessage (message post)
+      insertPostOnlyMessage (message post)
       respond $ responseLBS status200 [("Content-Type", "text/plain")] "message added successfully"
     Nothing ->
       respond $ responseLBS status400 [("Content-Type", "text/plain")] "invalid JSON"
