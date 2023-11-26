@@ -3,50 +3,53 @@ import { useEffect, useState } from 'react'
 
 const baseApiUrl = "http://localhost:3000/api"
 
-function App() {
-  const [responseText, setResponseText] = useState('');
+export default function App() {
   const [message, setMessage] = useState('')
+
   const handleChangeMessage = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(event.target.value)
   }
+
   const initMessage = () => {
     setMessage('')
   }
+
   const postMessage = async () => {
-    const res = await fetch(`${baseApiUrl}/posts`, {
+    await fetch(`${baseApiUrl}/posts`, {
       method: 'POST',
       body: JSON.stringify({ message })
     })
-    const text = await res.text()
-    setResponseText(text)
     initMessage()
   }
 
   useEffect(() => {
     (async () => {
-      const result = await fetch(`${baseApiUrl}`);
-      const text = await result.text();
-      setResponseText(text);
+      // await fetch(`${baseApiUrl}`);
     })();
   }, [])
 
   return (
     <div className="App">
-      <div>{responseText}</div>
-
-      <textarea value={message} onChange={handleChangeMessage} style={{ resize: "none" }} />
-      <button onClick={postMessage}>post message</button>
-
-      <button onClick={async () => {
-        const res = await fetch(`${baseApiUrl}/foo`)
-        if (!res.ok) {
-          setResponseText('404')
-        }
-      }}>invalid request</button>
-
-      <button onClick={() => { window.location.reload() }}>reload</button>
+      <div style={postMessageStyle}>
+        <textarea style={textareaStyle} value={message} onChange={handleChangeMessage} />
+        <button style={buttonStyle} onClick={postMessage}>POST</button>
+      </div>
     </div>
   );
 }
 
-export default App;
+const postMessageStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'auto 64px',
+  columnGap: '4px'
+}
+
+const textareaStyle: React.CSSProperties = {
+  resize: "none"
+}
+
+const buttonStyle: React.CSSProperties = {
+  cursor: 'pointer',
+  color: '#ffffff',
+  backgroundColor: '#2162e0',
+}
