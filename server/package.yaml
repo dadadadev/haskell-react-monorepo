@@ -26,6 +26,8 @@ dependencies:
 - wai
 - wai-logger
 - warp
+- bytestring
+- aeson
 
 ghc-options:
 - -Wall

@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Server
@@ -5,17 +6,19 @@ module Server
   )
 where
 
+import Data.Aeson (FromJSON, decode)
+import qualified Data.ByteString.Lazy as BL
 import Db (insertMessage)
-import Network.HTTP.Types (status200, status404)
-import Network.Wai (Application, Request (pathInfo), responseLBS)
+import GHC.Generics (Generic)
+import Network.HTTP.Types (status200, status400, status404)
+import Network.Wai (Application, Request (pathInfo), getRequestBodyChunk, responseLBS)
 import Network.Wai.Handler.Warp (defaultSettings, runSettings, setLogger, setPort)
 import Network.Wai.Logger (withStdoutLogger)
 
 router :: Application
 router req = case pathInfo req of
   ["api"] -> indexApp req
-  ["api", "hello"] -> halloApp req
-  ["api", "create-message"] -> createMessage req
+  ["api", "posts"] -> postApp req
   _ -> notFoundApp req
 
 indexApp :: Application
@@ -34,22 +37,22 @@ notFoundApp _ respond = do
       [("Content-Type", "text/plain")]
       "404 Not found"
 
-halloApp :: Application
-halloApp _ respond = do
-  respond $
-    responseLBS
-      status200
-      [("Content-Type", "text/plain")]
-      "Hello"
+newtype Post = Post
+  { message :: String
+  }
+  deriving (Show, Generic)
 
-createMessage :: Application
-createMessage _ respond = do
-  insertMessage "test by request"
-  respond $
-    responseLBS
-      status200
-      [("Content-Type", "text/plain")]
-      "Succeeded"
+instance FromJSON Post
+
+postApp :: Application
+postApp req respond = do
+  body <- getRequestBodyChunk req
+  case decode (BL.fromChunks [body]) :: Maybe Post of
+    Just post -> do
+      insertMessage (message post)
+      respond $ responseLBS status200 [("Content-Type", "text/plain")] "message added successfully"
+    Nothing ->
+      respond $ responseLBS status400 [("Content-Type", "text/plain")] "invalid JSON"
 
 run :: IO ()
 run = do
