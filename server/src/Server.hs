@@ -6,9 +6,9 @@ module Server
   )
 where
 
-import Data.Aeson (FromJSON, decode)
+import Data.Aeson (FromJSON, decode, encode)
 import qualified Data.ByteString.Lazy as BL
-import Db (insertPostOnlyMessage)
+import Db (getPosts, insertPostOnlyMessage)
 import GHC.Generics (Generic)
 import Network.HTTP.Types (status200, status400, status404)
 import Network.Wai (Application, Request (pathInfo), getRequestBodyChunk, responseLBS)
@@ -18,7 +18,8 @@ import Network.Wai.Logger (withStdoutLogger)
 router :: Application
 router req = case pathInfo req of
   ["api"] -> indexApp req
-  ["api", "posts"] -> postApp req
+  ["api", "posts"] -> postsApp req
+  ["api", "posts", "message"] -> postsMessageApp req
   _ -> notFoundApp req
 
 indexApp :: Application
@@ -44,8 +45,14 @@ newtype Post = Post
 
 instance FromJSON Post
 
-postApp :: Application
-postApp req respond = do
+postsApp :: Application
+postsApp _ respond = do
+  posts <-
+    getPosts ""
+  respond $ responseLBS status200 [("Content-Type", "application/json")] (encode posts)
+
+postsMessageApp :: Application
+postsMessageApp req respond = do
   body <- getRequestBodyChunk req
   case decode (BL.fromChunks [body]) :: Maybe Post of
     Just post -> do

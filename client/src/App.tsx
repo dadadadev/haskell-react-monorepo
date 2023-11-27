@@ -5,6 +5,7 @@ const baseApiUrl = "http://localhost:3000/api"
 
 export default function App() {
   const [message, setMessage] = useState('')
+  const [posts, setPosts] = useState<{ id: number, message: string }[]>([])
 
   const handleChangeMessage = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(event.target.value)
@@ -15,16 +16,23 @@ export default function App() {
   }
 
   const postMessage = async () => {
-    await fetch(`${baseApiUrl}/posts`, {
+    await fetch(`${baseApiUrl}/posts/message`, {
       method: 'POST',
       body: JSON.stringify({ message })
     })
+
+    const req = await fetch(`${baseApiUrl}/posts`);
+    const json = await req.json()
+    setPosts(json)
+
     initMessage()
   }
 
   useEffect(() => {
     (async () => {
-      // await fetch(`${baseApiUrl}`);
+      const req = await fetch(`${baseApiUrl}/posts`);
+      const json = await req.json()
+      setPosts(json)
     })();
   }, [])
 
@@ -34,6 +42,10 @@ export default function App() {
         <textarea style={textareaStyle} value={message} onChange={handleChangeMessage} />
         <button style={buttonStyle} onClick={postMessage}>POST</button>
       </div>
+
+      <ul style={listWrapperStyle}>
+        {posts.map(post => <li key={post.id} style={listStyle}>{post.message}</li>)}
+      </ul>
     </div>
   );
 }
@@ -52,4 +64,14 @@ const buttonStyle: React.CSSProperties = {
   cursor: 'pointer',
   color: '#ffffff',
   backgroundColor: '#2162e0',
+}
+
+const listWrapperStyle: React.CSSProperties = {
+  listStyleType: 'none',
+  textAlign: 'left',
+}
+
+const listStyle: React.CSSProperties = {
+  borderTop: '1px solid #808080',
+  padding: '8px 16px'
 }
