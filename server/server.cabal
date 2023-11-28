@@ -27,6 +27,7 @@ library
   exposed-modules:
       Db
       Lib
+      Models
       Server
   other-modules:
       Paths_server
