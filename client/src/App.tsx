@@ -15,16 +15,29 @@ export default function App() {
     setMessage('')
   }
 
+  const refetchPosts = async () => {
+    const req = await fetch(`${baseApiUrl}/posts`);
+    const json = await req.json()
+    setPosts(json)
+  }
+
   const postMessage = async () => {
     await fetch(`${baseApiUrl}/posts/message`, {
       method: 'POST',
       body: JSON.stringify({ message })
     })
 
-    const req = await fetch(`${baseApiUrl}/posts`);
-    const json = await req.json()
-    setPosts(json)
+    refetchPosts()
+    initMessage()
+  }
 
+  const deleteMessages = async (ids: number[]) => {
+    await fetch(`${baseApiUrl}/posts/delete`, {
+      method: 'POST',
+      body: JSON.stringify({ ids })
+    })
+
+    refetchPosts()
     initMessage()
   }
 
@@ -40,11 +53,17 @@ export default function App() {
     <div className="App">
       <div style={postMessageStyle}>
         <textarea style={textareaStyle} value={message} onChange={handleChangeMessage} />
-        <button style={buttonStyle} onClick={postMessage}>POST</button>
+        <button style={postButtonStyle} disabled={message === ''} onClick={postMessage}>POST</button>
+        < button style={deletePostbuttonStyle} disabled={posts.length <= 0} onClick={async () => { deleteMessages(posts.map(({ id }) => id)) }}>DELETE ALL</button>
       </div>
 
       <ul style={listWrapperStyle}>
-        {posts.map(post => <li key={post.id} style={listStyle}>{post.message}</li>)}
+        {posts.map(post =>
+          <li key={post.id} style={listStyle}>
+            {post.message}
+            <button style={deletePostbuttonStyle} onClick={async () => { deleteMessages([post.id]) }}>DELETE</button>
+          </li>
+        )}
       </ul>
     </div>
   );
@@ -52,7 +71,7 @@ export default function App() {
 
 const postMessageStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'auto 64px',
+  gridTemplateColumns: 'auto 64px 112px',
   columnGap: '4px'
 }
 
@@ -60,7 +79,7 @@ const textareaStyle: React.CSSProperties = {
   resize: "none"
 }
 
-const buttonStyle: React.CSSProperties = {
+const postButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
   color: '#ffffff',
   backgroundColor: '#2162e0',
@@ -72,6 +91,16 @@ const listWrapperStyle: React.CSSProperties = {
 }
 
 const listStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
   borderTop: '1px solid #808080',
+  minWidth: '320px',
   padding: '8px 16px'
+}
+
+const deletePostbuttonStyle: React.CSSProperties = {
+  cursor: 'pointer',
+  color: '#ffffff',
+  backgroundColor: 'red',
 }

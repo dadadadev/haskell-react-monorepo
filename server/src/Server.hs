@@ -5,9 +5,11 @@ module Server
   )
 where
 
-import Data.Aeson (decode, encode)
+import Control.Monad (join)
+import Data.Aeson (decode, encode, (.:))
+import Data.Aeson.Types (Object, parseMaybe)
 import qualified Data.ByteString.Lazy as BL
-import Db (getPosts, insertPostOnlyMessage)
+import Db (deletePosts, getPosts, insertPostOnlyMessage)
 import Models (APIPost (apiPostMessage), postToAPIPost)
 import Network.HTTP.Types (status200, status400, status404)
 import Network.Wai (Application, Request (pathInfo), getRequestBodyChunk, responseLBS)
@@ -18,6 +20,7 @@ router :: Application
 router req = case pathInfo req of
   ["api"] -> indexApp req
   ["api", "posts"] -> postsApp req
+  ["api", "posts", "delete"] -> deletePostsApp req
   ["api", "posts", "message"] -> postsMessageApp req
   _ -> notFoundApp req
 
@@ -43,6 +46,16 @@ postsApp _ respond = do
   let aPIPosts = map postToAPIPost posts
   respond $ responseLBS status200 [("Content-Type", "application/json")] (encode aPIPosts)
 
+deletePostsApp :: Application
+deletePostsApp req respond = do
+  body <- getRequestBodyChunk req
+  case extractIds (BL.fromStrict body) of
+    Just ids -> do
+      deletePosts ids
+      respond $ responseLBS status200 [("Content-Type", "text/plain")] "message added successfully"
+    Nothing ->
+      respond $ responseLBS status400 [("Content-Type", "text/plain")] "invalid JSON"
+
 postsMessageApp :: Application
 postsMessageApp req respond = do
   body <- getRequestBodyChunk req
@@ -60,3 +73,8 @@ run = do
     \apilogger -> do
       let settings = setPort 8080 $ setLogger apilogger defaultSettings
       runSettings settings router
+
+extractIds :: BL.ByteString -> Maybe [Int]
+extractIds jsonData = do
+  obj <- decode jsonData :: Maybe Object
+  join $ parseMaybe (.: "ids") obj
