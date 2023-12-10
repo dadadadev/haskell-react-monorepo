@@ -38,7 +38,7 @@ data Post
       { postId :: Int,
         postMessage :: Message
       }
-  | PostPresentacion
+  | PostPresentation
       { postId :: Int,
         postMessage :: Message
       }
@@ -47,25 +47,25 @@ data Post
 instance DTO Post where
   toData (PostData fromId fromMessage) = PostData fromId fromMessage
   toData (PostEntity fromId fromMessage) = PostData fromId fromMessage
-  toData (PostPresentacion fromId fromMessage) = PostData fromId fromMessage
+  toData (PostPresentation fromId fromMessage) = PostData fromId fromMessage
   toEntitiy (PostData fromId fromMessage) = PostEntity fromId fromMessage
   toEntitiy (PostEntity fromId fromMessage) = PostEntity fromId fromMessage
-  toEntitiy (PostPresentacion fromId fromMessage) = PostEntity fromId fromMessage
-  toPresentation (PostData fromId fromMessage) = PostPresentacion fromId fromMessage
-  toPresentation (PostEntity fromId fromMessage) = PostPresentacion fromId fromMessage
-  toPresentation (PostPresentacion fromId fromMessage) = PostPresentacion fromId fromMessage
+  toEntitiy (PostPresentation fromId fromMessage) = PostEntity fromId fromMessage
+  toPresentation (PostData fromId fromMessage) = PostPresentation fromId fromMessage
+  toPresentation (PostEntity fromId fromMessage) = PostPresentation fromId fromMessage
+  toPresentation (PostPresentation fromId fromMessage) = PostPresentation fromId fromMessage
 
 instance FromRow Post where
   fromRow = PostEntity <$> field <*> field
 
 instance FromJSON Post where
   parseJSON = withObject "Post" $ \v ->
-    PostPresentacion
+    PostPresentation
       <$> v .: fromString "id"
       <*> v .: fromString "message"
 
 instance ToJSON Post where
-  toJSON (PostPresentacion fromId fromMessage) =
+  toJSON (PostPresentation fromId fromMessage) =
     object
       [ fromString "id" .= fromId,
         fromString "message" .= fromMessage
