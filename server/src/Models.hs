@@ -1,12 +1,7 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Models
-  ( Post,
-    DBPost (..),
-    APIPost (..),
-    postToDBPost,
-    dBPostToPost,
-    postToAPIPost,
+  ( Post (..),
+    DTO (..),
+    OnlyMessage (..),
   )
 where
 
@@ -18,55 +13,65 @@ import Data.Aeson.Types
     object,
     withObject,
     (.:),
-    (.:?),
   )
 import Database.SQLite.Simple (FromRow (fromRow))
 import Database.SQLite.Simple.FromRow (field)
-import GHC.Generics (Generic)
 
-data Post = Post
-  { id :: Int,
-    message :: String
+class DTO a where
+  toData :: a -> a
+  toEntitiy :: a -> a
+  toPresentation :: a -> a
+
+type Message = String
+
+data OnlyMessage = OnlyMessage
+  { message :: Message
   }
   deriving (Show, Eq)
 
-data DBPost = DBPost
-  { dbPostId :: Int,
-    dbPostMessage :: String
-  }
-  deriving (Show, Eq, Generic)
+data Post
+  = PostData
+      { postId :: Int,
+        postMessage :: Message
+      }
+  | PostEntity
+      { postId :: Int,
+        postMessage :: Message
+      }
+  | PostPresentacion
+      { postId :: Int,
+        postMessage :: Message
+      }
+  deriving (Show, Eq)
 
-instance FromRow DBPost where
-  fromRow = DBPost <$> field <*> field
+instance DTO Post where
+  toData (PostData fromId fromMessage) = PostData fromId fromMessage
+  toData (PostEntity fromId fromMessage) = PostData fromId fromMessage
+  toData (PostPresentacion fromId fromMessage) = PostData fromId fromMessage
+  toEntitiy (PostData fromId fromMessage) = PostEntity fromId fromMessage
+  toEntitiy (PostEntity fromId fromMessage) = PostEntity fromId fromMessage
+  toEntitiy (PostPresentacion fromId fromMessage) = PostEntity fromId fromMessage
+  toPresentation (PostData fromId fromMessage) = PostPresentacion fromId fromMessage
+  toPresentation (PostEntity fromId fromMessage) = PostPresentacion fromId fromMessage
+  toPresentation (PostPresentacion fromId fromMessage) = PostPresentacion fromId fromMessage
 
-data APIPost = APIPost
-  { apiPostId :: Maybe Int,
-    apiPostMessage :: String
-  }
-  deriving (Show, Eq, Generic)
+instance FromRow Post where
+  fromRow = PostEntity <$> field <*> field
 
-instance FromJSON APIPost where
-  parseJSON = withObject "APIPost" $ \v ->
-    APIPost
-      <$> v .:? fromString "id"
+instance FromJSON Post where
+  parseJSON = withObject "Post" $ \v ->
+    PostPresentacion
+      <$> v .: fromString "id"
       <*> v .: fromString "message"
 
-instance ToJSON APIPost where
-  toJSON (APIPost oApiPostId oAapiPostMessage) =
+instance ToJSON Post where
+  toJSON (PostPresentacion fromId fromMessage) =
     object
-      [ fromString "id" .= oApiPostId,
-        fromString "message" .= oAapiPostMessage
+      [ fromString "id" .= fromId,
+        fromString "message" .= fromMessage
       ]
+  toJSON _ = error "Invalid Post type"
 
-postToDBPost :: Post -> DBPost
-postToDBPost (Post postId postMessage) = DBPost postId postMessage
-
-dBPostToPost :: DBPost -> Post
-dBPostToPost (DBPost postId postMessage) = Post postId postMessage
-
-postToAPIPost :: Post -> APIPost
-postToAPIPost (Post postId postMessage) =
-  APIPost
-    { apiPostId = Just postId,
-      apiPostMessage = postMessage
-    }
+instance FromJSON OnlyMessage where
+  parseJSON = withObject "OnlyMessage" $ \v ->
+    OnlyMessage <$> (v .: fromString "message")
